@@ -6,14 +6,13 @@ using Microsoft.AspNetCore.Testing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 using Xunit;
-
 using AbstractionResources = Microsoft.Extensions.DependencyInjection.Abstractions.Resources;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection.Tests
 {
     public class ServiceCollectionServiceExtensionsTest
     {
-        private static readonly FakeService _instance = new FakeService();
+        private static readonly FakeService Instance = new FakeService();
 
         public static TheoryData AddImplementationTypeData
         {
@@ -40,6 +39,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 };
             }
         }
+
+        //NOTE: Theory 时 每次取得原来的TheoryData中的一项数据进行测试
 
         [Theory]
         [MemberData(nameof(AddImplementationTypeData))]
@@ -113,8 +114,8 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 return new TheoryData<Action<IServiceCollection>>
                 {
-                    { collection => collection.AddSingleton<IFakeService>(_instance) },
-                    { collection => collection.AddSingleton(typeof(IFakeService), _instance) },
+                    { collection => collection.AddSingleton<IFakeService>(Instance) },
+                    { collection => collection.AddSingleton(typeof(IFakeService), Instance) },
                 };
             }
         }
@@ -132,10 +133,12 @@ namespace Microsoft.Extensions.DependencyInjection
             // Assert
             var descriptor = Assert.Single(collection);
             Assert.Equal(typeof(IFakeService), descriptor.ServiceType);
-            Assert.Same(_instance, descriptor.ImplementationInstance);
+            Assert.Same(Instance, descriptor.ImplementationInstance);
             Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime);
         }
 
+
+        
         [Theory]
         [MemberData(nameof(AddSingletonData))]
         public void TryAddNoOpFailsIfExists(Action<IServiceCollection> addAction)
@@ -145,13 +148,14 @@ namespace Microsoft.Extensions.DependencyInjection
             addAction(collection);
             var d = ServiceDescriptor.Transient<IFakeService, FakeService>();
 
+            //Note:同一ServiceType的Descriptor只能加入一次。注：只针对TryAdd有效。Add的话，不论如何都会加入
             // Act
             collection.TryAdd(d);
 
             // Assert
             var descriptor = Assert.Single(collection);
             Assert.Equal(typeof(IFakeService), descriptor.ServiceType);
-            Assert.Same(_instance, descriptor.ImplementationInstance);
+            Assert.Same(Instance, descriptor.ImplementationInstance);
             Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime);
         }
 
@@ -212,10 +216,10 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             // Arrange
             var collection = new ServiceCollection();
-            collection.Add(ServiceDescriptor.Transient(expectedServiceType, expectedServiceType));
+            collection.Add(ServiceDescriptor.Transient(expectedServiceType, expectedServiceType));//Note:这个是 错的加入，都是服务类型。仅用于测试。
 
             // Act
-            addAction(collection);
+            addAction(collection); //Note：这个实际上是没有加进去的。
 
             // Assert
             var descriptor = Assert.Single(collection);
@@ -258,7 +262,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     { ServiceDescriptor.Singleton<IFakeService, FakeService>(), serviceType, implementationType, ServiceLifetime.Singleton },
                     { ServiceDescriptor.Singleton<IFakeService, FakeService >(s => new FakeService()), serviceType, implementationType, ServiceLifetime.Singleton },
 
-                    { ServiceDescriptor.Singleton<IFakeService>(_instance), serviceType, implementationType, ServiceLifetime.Singleton },
+                    { ServiceDescriptor.Singleton<IFakeService>(Instance), serviceType, implementationType, ServiceLifetime.Singleton },
                 };
             }
         }
@@ -297,6 +301,7 @@ namespace Microsoft.Extensions.DependencyInjection
             var collection = new ServiceCollection();
             collection.TryAddEnumerable(descriptor);
 
+            //Note:同样的服务只能加入一次。
             // Act
             collection.TryAddEnumerable(descriptor);
 
@@ -311,6 +316,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             get
             {
+                //Note：非法的服务描述
                 var serviceType = typeof(IFakeService);
                 var implementationType = typeof(FakeService);
                 var objectType = typeof(object);
@@ -328,6 +334,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 };
             }
         }
+
+        //NOTE：TryAdd 与 TryAddEnumerable 的区别是TryAdd只能加不同ServiceType的，而TryAddEnumerable加的是ServerType和implementationType都不同的类型。
 
         [Theory]
         [MemberData(nameof(TryAddEnumerableInvalidImplementationTypeData))]
@@ -389,6 +397,7 @@ namespace Microsoft.Extensions.DependencyInjection
             collection.Add(descriptor2);
             var descriptor3 = new ServiceDescriptor(typeof(IFakeService), typeof(FakeService), ServiceLifetime.Singleton);
 
+            //NOTE:Replace只是把第一个ServiceType相同的替换掉。
             // Act
             collection.Replace(descriptor3);
 
@@ -408,6 +417,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 new ServiceDescriptor(typeof(IFakeService), typeof(FakeService), ServiceLifetime.Transient)
             };
 
+            //NOTE : 移除所有同一ServiceType的定义
             // Act
             collection.RemoveAll<IFakeService>();
 

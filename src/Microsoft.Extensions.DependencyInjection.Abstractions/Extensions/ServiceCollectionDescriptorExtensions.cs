@@ -82,7 +82,7 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(descriptor));
             }
 
-            if (!collection.Any(d => d.ServiceType == descriptor.ServiceType))
+            if (collection.All(d => d.ServiceType != descriptor.ServiceType))
             {
                 collection.Add(descriptor);
             }
@@ -473,6 +473,9 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
             }
         }
 
+
+        //NOTE：TryAdd 与 TryAddEnumerable 的区别是TryAdd只能加不同ServiceType的，而TryAddEnumerable加的是ServerType和implementationType都不同的类型。
+
         /// <summary>
         /// Adds the specified <see cref="ServiceDescriptor"/>s if an existing descriptor with the same
         /// <see cref="ServiceDescriptor.ServiceType"/> and an implementation that does not already exist
@@ -510,6 +513,7 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
             }
         }
 
+        //NOTE:Replace只是把第一个ServiceType相同的替换掉。
         /// <summary>
         /// Removes the first service in <see cref="IServiceCollection"/> with the same service type
         /// as <paramref name="descriptor"/> and adds <paramef name="descriptor"/> to the collection.

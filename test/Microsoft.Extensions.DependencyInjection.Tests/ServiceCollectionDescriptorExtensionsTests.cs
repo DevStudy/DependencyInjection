@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 using Xunit;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection.Tests
 {
     public class ServiceCollectionDescriptorExtensionsTest
     {
@@ -57,6 +57,28 @@ namespace Microsoft.Extensions.DependencyInjection
             // Assert
             var result = Assert.Single(serviceCollection);
             Assert.Same(result, descriptor2);
+        }
+
+
+        /// <summary>
+        /// 同一实例可以多次加入。
+        /// </summary>
+        [Fact]
+        public void ServiceDescriptors_AddRepeartPreviousRegisteredServices()
+        {
+            // Arrange
+            var serviceCollection = new ServiceCollection();
+            var descriptor1 = new ServiceDescriptor(typeof(IFakeService), new FakeService());
+            var descriptor2 = new ServiceDescriptor(typeof(IFactoryService), typeof(TransientFactoryService), ServiceLifetime.Transient);
+
+            // Act
+            serviceCollection.Add(descriptor1);
+            serviceCollection.Add(descriptor2);
+            serviceCollection.Add(descriptor1);
+
+            // Assert
+            Assert.Equal(3, serviceCollection.Count);
+            Assert.Equal(new[] { descriptor1, descriptor2,descriptor1 }, serviceCollection);
         }
     }
 }
