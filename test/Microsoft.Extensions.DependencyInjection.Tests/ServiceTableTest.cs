@@ -4,12 +4,20 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Testing;
+using Microsoft.Extensions.DependencyInjection.ServiceLookup;
 using Xunit;
 
-namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
+namespace Microsoft.Extensions.DependencyInjection.Tests
 {
     public class ServiceTableTest
     {
+
+
+        /// <summary>
+        /// NOTE:禁止开放泛型对应具体泛型的实现。
+        /// 当ServerType是一个开放的泛型时，ImplementationType也必须是开放泛型，否则就会抛出异常。
+        /// </summary>
+        /// <param name="type"></param>
         [Theory]
         [InlineData(typeof(List<int>))]
         [InlineData(typeof(string))]
@@ -21,6 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
             {
                 new ServiceDescriptor(typeof(IList<>), type, ServiceLifetime.Transient)
             };
+
 
             // Act and Assert
             ExceptionAssert.ThrowsArgument(
@@ -69,5 +78,7 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
                 "descriptors",
                 $"Open generic service type '{typeof(Tuple<>)}' requires registering an open generic implementation type.");
         }
+
+        //TODO:为什么要保持ServiceType和ImplmentationType都要保持OpenGeneric?
     }
 }

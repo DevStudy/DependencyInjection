@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Testing;
 using Xunit;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection.Tests
 {
     public class ServiceProviderExtensionsTest
     {
@@ -24,6 +24,9 @@ namespace Microsoft.Extensions.DependencyInjection
             Assert.IsType<Foo1>(service);
         }
 
+       
+
+
         [Fact]
         public void ISupportRequiredService_GetRequiredService_Returns_CorrectService()
         {
@@ -31,10 +34,21 @@ namespace Microsoft.Extensions.DependencyInjection
             var serviceProvider = new RequiredServiceSupportingProvider();
 
             // Act
-            var service = serviceProvider.GetRequiredService<IBar>();
+            var service = serviceProvider.GetRequiredService<IBar>(); //NOTE：IBar已经直接返回实例了。
 
             // Assert
             Assert.IsType<Bar1>(service);
+        }
+
+       
+        [Fact]
+        public void ISupportRequiredService_GetRequiredService_Throws_WhenNoServiceRegistered()
+        {
+            // Arrange
+            var serviceProvider = new RequiredServiceSupportingProvider();
+
+            // Act + Assert
+            ExceptionAssert.Throws<RankException>(() => serviceProvider.GetRequiredService<IFoo>()); //NOTE：IFoo没有处理。
         }
 
         [Fact]
@@ -44,20 +58,9 @@ namespace Microsoft.Extensions.DependencyInjection
             var serviceProvider = CreateTestServiceProvider(0);
 
             // Act + Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => serviceProvider.GetRequiredService<IFoo>(),
+            ExceptionAssert.Throws<InvalidOperationException>(() => serviceProvider.GetRequiredService<IFoo>(),//NOTE:泛型取得
                 $"No service for type '{typeof(IFoo)}' has been registered.");
         }
-
-        [Fact]
-        public void ISupportRequiredService_GetRequiredService_Throws_WhenNoServiceRegistered()
-        {
-            // Arrange
-            var serviceProvider = new RequiredServiceSupportingProvider();
-
-            // Act + Assert
-            ExceptionAssert.Throws<RankException>(() => serviceProvider.GetRequiredService<IFoo>());
-        }
-
         [Fact]
         public void NonGeneric_GetRequiredService_Throws_WhenNoServiceRegistered()
         {
@@ -65,7 +68,7 @@ namespace Microsoft.Extensions.DependencyInjection
             var serviceProvider = CreateTestServiceProvider(0);
 
             // Act + Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => serviceProvider.GetRequiredService(typeof(IFoo)),
+            ExceptionAssert.Throws<InvalidOperationException>(() => serviceProvider.GetRequiredService(typeof(IFoo)),//NOTE:一般取得
                 $"No service for type '{typeof(IFoo)}' has been registered.");
         }
 
@@ -122,7 +125,6 @@ namespace Microsoft.Extensions.DependencyInjection
             var item = Assert.Single(services);
             Assert.IsType<Foo1>(item);
         }
-
         [Fact]
         public void NonGeneric_GetServices_Returns_SingleService()
         {
@@ -167,7 +169,6 @@ namespace Microsoft.Extensions.DependencyInjection
             Assert.Empty(services);
             Assert.IsType<IFoo[]>(services);
         }
-
         [Fact]
         public void NonGeneric_GetServices_Returns_EmptyArray_WhenNoServicesAvailable()
         {
@@ -192,12 +193,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
             // Act
             var services = serviceProvider.GetServices<IFoo>();
+            var services2 = serviceProvider.GetServices<IEnumerable<IFoo>>(); //Note：只有正确的ServiceType才能返回正确的实例。
 
             // Assert
             Assert.Empty(services);
             Assert.IsType<List<IFoo>>(services);
+            Assert.Equal(1,services2.Count());
         }
-
         [Fact]
         public void NonGeneric_GetServices_WithBuildServiceProvider_Returns_EmptyList_WhenNoServicesAvailable()
         {
@@ -208,10 +210,12 @@ namespace Microsoft.Extensions.DependencyInjection
 
             // Act
             var services = serviceProvider.GetServices(typeof(IFoo));
+            var services2 = serviceProvider.GetServices(typeof(IEnumerable<IFoo>)); //Note：只有正确的ServiceType才能返回正确的实例。
 
             // Assert
             Assert.Empty(services);
             Assert.IsType<List<IFoo>>(services);
+            Assert.Equal(1,services2.Count());
         }
 
         private static IServiceProvider CreateTestServiceProvider(int count)

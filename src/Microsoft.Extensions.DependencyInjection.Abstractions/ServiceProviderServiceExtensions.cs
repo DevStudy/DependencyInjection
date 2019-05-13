@@ -46,9 +46,8 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 throw new ArgumentNullException(nameof(serviceType));
             }
-
-            var requiredServiceSupportingProvider = provider as ISupportRequiredService;
-            if (requiredServiceSupportingProvider != null)
+            //NOTE:相关于是IServiceProvider的Hack了。劫持了原有来的IServiceProvider对像，如果能转换成ISupportRequiredService的话优先使用ISupportRequiredService的返回。
+            if (provider is ISupportRequiredService requiredServiceSupportingProvider)
             {
                 return requiredServiceSupportingProvider.GetRequiredService(serviceType);
             }

@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Microsoft.Extensions.DependencyInjection.Tests
 {
+    //NOTE£ºread.
     public class ServiceCollectionDescriptorExtensionsTest
     {
         [Fact]

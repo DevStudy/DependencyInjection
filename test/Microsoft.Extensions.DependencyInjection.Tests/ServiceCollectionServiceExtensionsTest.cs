@@ -10,6 +10,7 @@ using AbstractionResources = Microsoft.Extensions.DependencyInjection.Abstractio
 
 namespace Microsoft.Extensions.DependencyInjection.Tests
 {
+    //NOTE£ºread.
     public class ServiceCollectionServiceExtensionsTest
     {
         private static readonly FakeService Instance = new FakeService();

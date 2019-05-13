@@ -3,8 +3,11 @@
 
 using System;
 
-namespace Microsoft.Extensions.DependencyInjection.Specification.Fakes
+namespace Microsoft.Extensions.DependencyInjection.Specification.Tests.Fakes
 {
+    /// <summary>
+    /// 无参构造直抛异常
+    /// </summary>
     public class ClassWithThrowingEmptyCtor
     {
         public ClassWithThrowingEmptyCtor()

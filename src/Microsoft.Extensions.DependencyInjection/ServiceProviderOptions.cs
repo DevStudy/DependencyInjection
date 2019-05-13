@@ -12,6 +12,8 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public class ServiceProviderOptions
     {
+        //NOTE：它有两次调用，可以认为是个Const定义。这儿的目的应该只是为了一次初始化，多次使用。节省一点点空间和时间。
+        //NOTE: 可能 是别的地方有另外继承基类， 反过来再修改添加行为的时候 加出来的， 或许可能再加一个类来实现更好
         // Avoid allocating objects in the default case
         internal static readonly ServiceProviderOptions Default = new ServiceProviderOptions();
 

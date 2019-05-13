@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
+using Microsoft.Extensions.DependencyInjection.Specification.Tests.Fakes;
 using Xunit;
 
 namespace Microsoft.Extensions.DependencyInjection.Specification

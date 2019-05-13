@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection.ServiceLookup;
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
+using Microsoft.Extensions.DependencyInjection.Specification.Tests.Fakes;
 using Xunit;
 
 namespace Microsoft.Extensions.DependencyInjection.Tests

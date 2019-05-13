@@ -22,6 +22,10 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
             Populate(descriptors);
         }
 
+        /// <summary>
+        /// 将ServiceDescriptor集合加入 <see cref="_descriptorLookup"/>
+        /// </summary>
+        /// <param name="descriptors"></param>
         private void Populate(IEnumerable<ServiceDescriptor> descriptors)
         {
             foreach (var descriptor in descriptors)
