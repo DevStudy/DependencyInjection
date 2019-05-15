@@ -16,6 +16,8 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
         protected override IServiceProvider CreateServiceProvider(IServiceCollection collection) =>
             collection.BuildServiceProvider();
 
+
+        //NOTE:构造时异常将在取得实例时抛出。
         [Fact]
         public void RethrowOriginalExceptionFromConstructor()
         {
@@ -26,6 +28,8 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
 
             var provider = serviceCollection.BuildServiceProvider();
 
+                // var x1 = provider.GetService<ClassWithThrowingEmptyCtor>();
+
             var ex1 = Assert.Throws<Exception>(() => provider.GetService<ClassWithThrowingEmptyCtor>());
             Assert.Equal(nameof(ClassWithThrowingEmptyCtor), ex1.Message);
 
@@ -33,6 +37,9 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
             Assert.Equal(nameof(ClassWithThrowingCtor), ex2.Message);
         }
 
+        /// <summary>
+        /// NOTE：注入私有构造器的类在被取得 或依赖时将抛出异常。
+        /// </summary>
         [Fact]
         public void DependencyWithPrivateConstructorIsIdentifiedAsPartOfException()
         {
@@ -49,11 +56,15 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
             Assert.Equal(expectedMessage, ex.Message);
         }
 
+        /// <summary>
+        /// NOTE：试图取得一个没有对应服务实例的类时将抛出异常。
+        /// </summary>
         [Fact]
         public void AttemptingToResolveNonexistentServiceIndirectlyThrows()
         {
             // Arrange
             var collection = new ServiceCollection();
+            //collection.AddTransient<IFakeService, FakeService>();//NOTE:加入这个即可正常取得实例。
             collection.AddTransient<DependOnNonexistentService>();
             var provider = CreateServiceProvider(collection);
 
@@ -68,8 +79,11 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
         {
             // Arrange
             var collection = new ServiceCollection();
+            //collection.AddTransient<IFakeService, FakeService>();//NOTE:加入这个即可正常取得实例。
             collection.AddTransient<DependOnNonexistentService>();
             var provider = CreateServiceProvider(collection);
+
+            //var cos = provider.GetService<IEnumerable<DependOnNonexistentService>>(); //NOTE:如果能成功取得的话，取得单一实例和取得集合实例都是可行的。
 
             // Act and Assert
             var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -78,6 +92,11 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
                 $"'{typeof(DependOnNonexistentService)}'.", ex.Message);
         }
 
+        /// <summary>
+        /// NOTE：服务类型与服务实现类型要一一对应，并且可以实例化，抽像的服务无法使用。
+        /// </summary>
+        /// <param name="serviceType"></param>
+        /// <param name="implementationType"></param>
         [Theory]
         // GenericTypeDefintion, Abstract GenericTypeDefintion
         [InlineData(typeof(IFakeOpenGenericService<>), typeof(AbstractFakeOpenGenericService<>))]
@@ -102,6 +121,9 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
                 exception.Message);
         }
 
+        /// <summary>
+        /// NOTE：释放Service的Provider时不会释放返回的实例。
+        /// </summary>
         [Fact]
         public void DoesNotDisposeSingletonInstances()
         {
@@ -113,7 +135,10 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
             provider.GetService<Disposable>();
 
             provider.Dispose();
-
+                
+            var x2 =  provider.GetService<Disposable>(); //NOTE:即使释放了provider，我还是能取得单例类。
+            Assert.Equal(disposable,x2); 
+            //disposable.Dispose();
             Assert.False(disposable.Disposed);
         }
 

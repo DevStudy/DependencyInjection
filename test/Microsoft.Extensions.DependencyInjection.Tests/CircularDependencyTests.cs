@@ -3,12 +3,19 @@
 
 using System;
 using Microsoft.Extensions.DependencyInjection.Tests.Fakes;
+using Microsoft.Extensions.DependencyInjection.Tests.Fakes.CircularReferences;
 using Xunit;
 
 namespace Microsoft.Extensions.DependencyInjection.Tests
 {
+    /// <summary>
+    /// 关于循环引用的测试
+    /// </summary>
     public class CircularDependencyTests
     {
+        /// <summary>
+        /// NOTE：类构造时传参自身不能取得实例。
+        /// </summary>
         [Fact]
         public void SelfCircularDependency()
         {
@@ -24,6 +31,9 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
                 exception.Message);
         }
 
+        /// <summary>
+        /// NOTE：自已引用自已的泛型服务也是无法取得服务实例的。
+        /// </summary>
         [Fact]
         public void SelfCircularDependencyGenericDirect()
         {
@@ -59,7 +69,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
         public void NoCircularDependencyGeneric()
         {
             var serviceProvider = new ServiceCollection()
-                .AddSingleton(new SelfCircularDependencyGeneric<string>())
+                .AddSingleton(new SelfCircularDependencyGeneric<string>()) //NOTE：已有一个单例后，即可使用非循环引用来取得服务实例了。
                 .AddTransient<SelfCircularDependencyGeneric<int>>()
                 .BuildServiceProvider();
 
@@ -85,6 +95,9 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
                 exception.Message);
         }
 
+        /// <summary>
+        /// NOTE：相互的循环引用也是不行的。无法创建服务实例。
+        /// </summary>
         [Fact]
         public void DirectCircularDependency()
         {
@@ -105,7 +118,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
         public void IndirectCircularDependency()
         {
             var serviceProvider = new ServiceCollection()
-                .AddSingleton<IndirectCircularDependencyA>()
+                .AddSingleton<IndirectCircularDependencyA>() //NOTE：这个单独是无法创建的。因为它的参数无法自动得取。
                 .AddTransient<IndirectCircularDependencyB>()
                 .AddTransient<IndirectCircularDependencyC>()
                 .BuildServiceProvider();
@@ -127,7 +140,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests
                 .AddTransient<NoCircularDependencySameTypeMultipleTimesC>()
                 .BuildServiceProvider();
 
-            var resolvedService = serviceProvider.GetRequiredService<NoCircularDependencySameTypeMultipleTimesA>();
+            var resolvedService = serviceProvider.GetRequiredService<NoCircularDependencySameTypeMultipleTimesA>(); //A的依赖链上没有循环依赖。
             Assert.NotNull(resolvedService);
         }
     }

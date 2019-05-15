@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Extensions.DependencyInjection.Specification.Tests.Fakes
 {
     /// <summary>
-    /// 无参构造直抛异常
+    /// 无参构造异常
     /// </summary>
     public class ClassWithThrowingEmptyCtor
     {

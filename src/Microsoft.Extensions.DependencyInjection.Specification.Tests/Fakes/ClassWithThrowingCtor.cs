@@ -2,9 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 
-namespace Microsoft.Extensions.DependencyInjection.Specification.Fakes
+namespace Microsoft.Extensions.DependencyInjection.Specification.Tests.Fakes
 {
+    /// <summary>
+    /// 有参构造异常
+    /// </summary>
     public class ClassWithThrowingCtor
     {
         public ClassWithThrowingCtor(IFakeService service)

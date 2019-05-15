@@ -3,7 +3,7 @@
 
 namespace Microsoft.Extensions.DependencyInjection.Tests.Fakes
 {
-    public class IndirectCircularDependencyC
+    public abstract class IndirectCircularDependencyC
     {
         public IndirectCircularDependencyC(IndirectCircularDependencyA a)
         {

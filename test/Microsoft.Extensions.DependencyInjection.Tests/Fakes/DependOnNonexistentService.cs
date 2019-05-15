@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 
-namespace Microsoft.Extensions.DependencyInjection.Tests
+namespace Microsoft.Extensions.DependencyInjection.Tests.Fakes
 {
     public class DependOnNonexistentService
     {
